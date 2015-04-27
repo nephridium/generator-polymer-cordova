@@ -1,3 +1,14 @@
+## Description
+
+This is a fork of the official yeoman/generator-polymer with some modifications to facilitate deployment using Cordova.
+
+### Cordova specific additions
+
+**Currently no modifications yet**
+
+*Following is the original yeoman/generator-polymer Readme.md:*
+
+---
 [![NPM version](http://img.shields.io/npm/v/generator-polymer.svg?style=flat)](http://npmjs.org/generator-polymer)
 [![NPM downloads](http://img.shields.io/npm/dm/generator-polymer.svg?style=flat)](http://npmjs.org/generator-polymer)
 [![Build Status](http://img.shields.io/travis/yeoman/generator-polymer/master.svg?style=flat)](https://travis-ci.org/yeoman/generator-polymer)
