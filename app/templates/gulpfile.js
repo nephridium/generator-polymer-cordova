@@ -1,5 +1,13 @@
 'use strict';
 
+// defaults, used
+var DEFAULT_PLATFORM = 'ios'; // e.g. 'android'/'ios'
+var DEFAULT_DEVICE = ''; // e.g. 'iPhone-4s'
+// paths used for cordova builds
+var CORDOVA_PATH = 'dist'; // location of the cordova project
+var DEPLOY_PATH = CORDOVA_PATH + '/www'; // compiled project location used when cordova deploys to target device
+
+
 // Include Gulp & Tools We'll Use
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
@@ -10,6 +18,25 @@ var pagespeed = require('psi');
 var reload = browserSync.reload;
 var merge = require('merge-stream');
 var path = require('path');
+var shell = require('gulp-shell');
+var argv = require('yargs').argv;
+
+// set up instructions for cordova plugins install using 'gulp plugins' task
+var plugins = require('./' + CORDOVA_PATH + '/plugins/fetch.json');
+var pluginInstructions = Object.keys(plugins).map(
+  function(s){ return('echo; cordova plugin add '+s); }
+);
+
+var platform = argv.platform || DEFAULT_PLATFORM;
+var device = argv.target || argv.device;
+var deviceParam = '';
+
+// set up '--target devicename' param for cordova deploys (if it was passed)
+if (device === true) { // only --target option given, use default device
+  deviceParam = ' --target ' + DEFAULT_DEVICE;
+} else if (device !== undefined) { // use --target with given device name
+  deviceParam = ' --target ' + device;
+}
 
 var AUTOPREFIXER_BROWSERS = [
   'ie >= 10',
@@ -44,7 +71,7 @@ var styleTask = function (stylesPath, srcs) {
     .pipe($.autoprefixer(AUTOPREFIXER_BROWSERS))
     .pipe(gulp.dest('.tmp/' + stylesPath))
     .pipe($.if('*.css', $.cssmin()))
-    .pipe(gulp.dest('dist/' + stylesPath))
+    .pipe(gulp.dest(DEPLOY_PATH + '/' + stylesPath))
     .pipe($.size({title: stylesPath}));
 };
 
@@ -78,7 +105,7 @@ gulp.task('images', function () {
       progressive: true,
       interlaced: true
     })))
-    .pipe(gulp.dest('dist/images'))
+    .pipe(gulp.dest(DEPLOY_PATH + '/images'))
     .pipe($.size({title: 'images'}));
 });
 
@@ -90,18 +117,18 @@ gulp.task('copy', function () {
     'node_modules/apache-server-configs/dist/.htaccess'
   ], {
     dot: true
-  }).pipe(gulp.dest('dist'));
+  }).pipe(gulp.dest(DEPLOY_PATH));
 
   var bower = gulp.src([
     'bower_components/**/*'
-  ]).pipe(gulp.dest('dist/bower_components'));
+  ]).pipe(gulp.dest(DEPLOY_PATH + '/bower_components'));
 
   var elements = gulp.src(['app/elements/**/*.html'])
-    .pipe(gulp.dest('dist/elements'));
+    .pipe(gulp.dest(DEPLOY_PATH + '/elements'));
 
   var vulcanized = gulp.src(['app/elements/elements.html'])
     .pipe($.rename('elements.vulcanized.html'))
-    .pipe(gulp.dest('dist/elements'));
+    .pipe(gulp.dest(DEPLOY_PATH + '/elements'));
 
   return merge(app, bower, elements, vulcanized).pipe($.size({title: 'copy'}));
 });
@@ -109,13 +136,13 @@ gulp.task('copy', function () {
 // Copy Web Fonts To Dist
 gulp.task('fonts', function () {
   return gulp.src(['app/fonts/**'])
-    .pipe(gulp.dest('dist/fonts'))
+    .pipe(gulp.dest(DEPLOY_PATH + '/fonts'))
     .pipe($.size({title: 'fonts'}));
 });
 
 // Scan Your HTML For Assets & Optimize Them
 gulp.task('html', function () {
-  var assets = $.useref.assets({searchPath: ['.tmp', 'app', 'dist']});
+  var assets = $.useref.assets({searchPath: ['.tmp', 'app', DEPLOY_PATH]});
 
   return gulp.src(['app/**/*.html', '!app/{elements,test}/**/*.html'])
     // Replace path for vulcanized assets
@@ -135,15 +162,15 @@ gulp.task('html', function () {
       spare: true
     })))
     // Output Files
-    .pipe(gulp.dest('dist'))
+    .pipe(gulp.dest(DEPLOY_PATH))
     .pipe($.size({title: 'html'}));
 });
 
 // Vulcanize imports
 gulp.task('vulcanize', function () {
-  var DEST_DIR = 'dist/elements';
+  var DEST_DIR = DEPLOY_PATH + '/elements';
 
-  return gulp.src('dist/elements/elements.vulcanized.html')
+  return gulp.src(DEPLOY_PATH + '/elements/elements.vulcanized.html')
     .pipe($.vulcanize({
       dest: DEST_DIR,
       strip: true,
@@ -154,7 +181,7 @@ gulp.task('vulcanize', function () {
 });
 
 // Clean Output Directory
-gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
+gulp.task('clean', del.bind(null, ['.tmp', DEPLOY_PATH]));
 
 // Watch Files For Changes & Reload
 gulp.task('serve', ['styles', 'elements'], function () {
@@ -189,9 +216,64 @@ gulp.task('serve:dist', ['default'], function () {
     // Note: this uses an unsigned certificate which on first access
     //       will present a certificate warning in the browser.
     // https: true,
-    server: 'dist'
+    server: DEPLOY_PATH
   });
 });
+
+// Show cordova plugins listed in ./dist/plugins/fetch.json
+gulp.task('plugins', function() {
+  console.log('Plugins specified in plugins/fetch.json (install using "gulp plugins:install")\n');
+  for (var i=0; i< Object.keys(plugins).length; i++) {
+    console.log(Object.keys(plugins)[i]);
+  }
+  console.log('');
+});
+
+// Install cordova plugins listed in ./dist/plugins/fetch.json
+gulp.task('plugins:install', shell.task(pluginInstructions, {
+  cwd: CORDOVA_PATH
+}));
+
+// Install cordova plugin specified via --source param, e.g. '--source org.apache.cordova.dialogs'
+gulp.task('plugins:add', shell.task('cordova plugin add '+ argv.source, {
+  cwd: CORDOVA_PATH
+}));
+
+
+// Build and serve the output from the dist build to emulator
+gulp.task('emulate', ['default'], shell.task([
+  'cordova emulate ' + platform + deviceParam
+], {
+  cwd: CORDOVA_PATH
+}));
+
+// Build and serve the output from the dist build to emulator
+gulp.task('run', ['default'], shell.task([
+  'cordova run --device ' + platform + deviceParam
+], {
+  cwd: CORDOVA_PATH
+}));
+
+// Build and serve the output from the dist build to emulator
+gulp.task('build:device', ['default'], shell.task([
+  'cordova compile ' + platform + deviceParam + ' --device'
+], {
+  cwd: CORDOVA_PATH
+}));
+
+// Deploy to device
+gulp.task('deploy:device', [], shell.task([
+  // 'cordova run --nobuild ' + platform + deviceParam + ' --device' // --nobuild seems broken
+  'cordova run --device ' + platform + deviceParam
+], {
+  cwd: CORDOVA_PATH
+}));
+
+// gulp.task('deploy:ios', ['default'], shell.task([
+//   'ios-deploy --noninteractive --bundle ' + 'test' + '.app'
+// ], {
+//   cwd: './cordova/platforms/ios/build/device/'
+// }));
 
 // Build Production Files, the Default Task
 gulp.task('default', ['clean'], function (cb) {

@@ -1,22 +1,25 @@
 {
-  "name": "generator-polymer",
+  "name": "generator-polymer-cordova",
   "version": "0.7.2",
-  "description": "Scaffold out a Polymer project",
+  "description": "Scaffold out a Polymer project for use with Cordova",
   "keywords": [
     "yeoman-generator",
     "scaffold",
     "framework",
     "mvc",
-    "polymer"
+    "polymer",
+    "cordova"
   ],
-  "author": "Chrome Developer Relations",
+  "author": "nephridium labs",
   "main": "app/index.js",
-  "repository": "yeoman/generator-polymer",
+  "repository": "nephridium/generator-polymer-cordova",
   "scripts": {
     "test": "jshint {app,el,gh,seed}/*.js && mocha --reporter spec"
   },
   "dependencies": {
     "chalk": "^1.0.0",
+    "cordova-lib": "^5.0.0",
+    "gulp-json-editor": "^2.2.1",
     "lodash": "^3.3.0",
     "ncp": "^2.0.0",
     "rimraf": "^2.2.8",

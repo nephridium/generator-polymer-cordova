@@ -1,7 +1,10 @@
 node_modules
-dist
 test/temp
 .sass-cache
 bower_components
 .tmp
 test/bower_components/
+dist/platforms
+dist/plugins/*
+!dist/plugins/fetch.json
+dist/www

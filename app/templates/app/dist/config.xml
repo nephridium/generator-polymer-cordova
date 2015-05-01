@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="<%= appId %>" version="<%= appVersion %>" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name><%= appName %></name>
+    <description>
+      <%= appDescription %>
+    </description>
+    <author email="<%= email %>" href="<%= url %>">
+        <%= author %>
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+    <preference name="orientation" value="portrait" />
+    <preference name="BackupWebStorage" value="local"/>
+
+    <icon src="res/icon.png" />
+
+    <feature name="NetworkStatus">
+        <param name="android-package" value="org.apache.cordova.networkinformation.NetworkManager" />
+        <param name="ios-package" value="CDVConnection" />
+    </feature>
+
+    <platform name="android">
+        <!-- you can use any density that exists in the Android project -->
+        <splash src="res/splash.png" density="land-hdpi"/>
+        <splash src="res/splash.png" density="land-ldpi"/>
+        <splash src="res/splash.png" density="land-mdpi"/>
+        <splash src="res/splash.png" density="land-xhdpi"/>
+
+        <splash src="res/splash.png" density="port-hdpi"/>
+        <splash src="res/splash.png" density="port-ldpi"/>
+        <splash src="res/splash.png" density="port-mdpi"/>
+        <splash src="res/splash.png" density="port-xhdpi"/>
+    </platform>
+
+    <platform name="ios">
+        <!-- images are determined by width and height. The following are supported -->
+        <splash src="res/splash.png" width="320" height="480"/>
+        <splash src="res/splash.png" width="640" height="960"/>
+        <splash src="res/splash.png" width="768" height="1024"/>
+        <splash src="res/splash.png" width="1536" height="2048"/>
+        <splash src="res/splash.png" width="1024" height="768"/>
+        <splash src="res/splash.png" width="2048" height="1536"/>
+        <splash src="res/splash.png" width="640" height="1136"/>
+        <splash src="res/splash.png" width="750" height="1334"/>
+        <splash src="res/splash.png" width="1242" height="2208"/>
+        <splash src="res/splash.png" width="2208" height="1242"/>
+    </platform>
+
+</widget>
