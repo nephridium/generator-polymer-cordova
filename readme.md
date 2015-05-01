@@ -1,10 +1,39 @@
-## Description
+## Yeoman generator for Polymer projects with Cordova support
 
-This is a fork of the official yeoman/generator-polymer with some modifications to facilitate deployment using Cordova.
+This is a fork of the official yeoman/generator-polymer with some modifications to facilitate deployment using Apache Cordova, some parts in the generator where taken from the excellent mobile generator mwaylabs/generator-m. Currently **only supports gulp**.
 
 ### Cordova specific additions
 
-**Currently no modifications yet**
+* when generator is run will ask for project name and ID to use for Cordova project
+* creates Cordova project in ```/dist```, Polymer project will be built in ```/dist/www``` which is then used for deployment
+* adds gulp tasks to deploy to emulator/device and add Cordova plugins (includes gulp-shell and yargs as devDependencies)
+
+### Quickstart
+
+Generate new project (make sure you enter package ID with valid format, e. g. com.domain.appname)
+```bash
+yo polymer-cordova
+```
+
+Add a Cordova plugin
+```bash
+yo plugin:add --source org.apache.cordova.geolocation
+```
+
+Develop app using live update in browser, source of default app is located in ```/app```
+```bash
+yo serve
+```
+
+Deploy to emulator
+```bash
+yo emulate --platform ios --device iPhone-4s
+```
+
+Deploy to device (add a ```--device <device-name>``` option if more than one device connected)
+```bash
+yo run --platform android
+```
 
 *Following is the original yeoman/generator-polymer Readme.md:*
 
